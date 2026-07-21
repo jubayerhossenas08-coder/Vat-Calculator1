@@ -103,6 +103,50 @@
       grid-column: span 2;
     }
 
+    .discount-box {
+      background: var(--btn-bg);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .discount-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .discount-header label {
+      margin-bottom: 0;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .discount-inputs {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: var(--sheba-red);
+    }
+
     label {
       font-size: 0.8rem;
       font-weight: 600;
@@ -201,14 +245,28 @@
 
   <div class="calculator-card">
     <div class="brand-header">
-      <div class="brand-title">Sheba.xyz VAT Calculate</div>
+      <div class="brand-title">Sheba.xyz VAT Calculator</div>
       <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
     </div>
 
     <!-- INCLUSIVE AMOUNT INPUT -->
     <div class="form-group full-width" style="margin-bottom: 12px;">
-      <label for="inclusiveAmount">Desired Customer Total (incl. VAT)</label>
+      <label for="inclusiveAmount">Original Customer Total (incl. VAT)</label>
       <input type="number" id="inclusiveAmount" placeholder="e.g. 400" step="any" autofocus />
+    </div>
+
+    <!-- ADVANCED EDITABLE DISCOUNT SECTION -->
+    <div class="discount-box">
+      <div class="discount-header">
+        <label>Custom Discount</label>
+      </div>
+      <div class="discount-inputs">
+        <select id="discountType">
+          <option value="percent">Percent (%)</option>
+          <option value="fixed">Fixed (৳)</option>
+        </select>
+        <input type="number" id="discountValue" placeholder="e.g. 10" step="any" min="0" />
+      </div>
     </div>
 
     <!-- GROSS COST AND RATES GRID -->
@@ -233,6 +291,10 @@
 
     <!-- CALCULATED RESULTS -->
     <div class="results">
+      <div class="result-row" id="discountRow" style="display: none; color: #ef4444;">
+        <span class="result-label" id="discountLabel" style="color: #ef4444; font-weight: 600;">Discount</span>
+        <span class="result-value" id="discountAmount">-৳0.00</span>
+      </div>
       <div class="result-row primary">
         <span class="result-label">Base Amount (System Entry)</span>
         <span class="result-value" id="baseAmount">৳0.00</span>
@@ -250,7 +312,7 @@
         <span class="result-value" id="spGrossAmount">৳0.00</span>
       </div>
       <div class="result-row">
-        <span class="result-label">Partner Net Profit (excl. Gross Cost)</span>
+        <span class="result-label">Partner Net Profit (excl. Cost)</span>
         <span class="result-value" id="spNetAmount" style="color: #10b981; font-weight: 700;">৳0.00</span>
       </div>
       <div class="result-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
@@ -267,11 +329,16 @@
   <script>
     // Elements
     const inclusiveInput = document.getElementById('inclusiveAmount');
+    const discountTypeSelect = document.getElementById('discountType');
+    const discountValueInput = document.getElementById('discountValue');
     const grossCostInput = document.getElementById('grossCost');
     const vatRateInput = document.getElementById('vatRate');
     const shebaShareInput = document.getElementById('shebaShare');
     const spShareInput = document.getElementById('spShare');
 
+    const discountRow = document.getElementById('discountRow');
+    const discountLabelEl = document.getElementById('discountLabel');
+    const discountAmountEl = document.getElementById('discountAmount');
     const baseAmountEl = document.getElementById('baseAmount');
     const vatAmountEl = document.getElementById('vatAmount');
     const shebaFeeAmountEl = document.getElementById('shebaFeeAmount');
@@ -283,7 +350,7 @@
     const copyBtn = document.getElementById('copyBtn');
     const toast = document.getElementById('toast');
 
-    let currentBase = 0, currentVat = 0, currentShebaFee = 0, currentSpGross = 0, currentSpNet = 0, currentTotal = 0;
+    let currentOriginalTotal = 0, currentDiscount = 0, currentBase = 0, currentVat = 0, currentShebaFee = 0, currentSpGross = 0, currentSpNet = 0, currentTotal = 0;
 
     // Synchronize Sheba % and SP % automatically
     shebaShareInput.addEventListener('input', () => {
@@ -299,34 +366,60 @@
     });
 
     function calculate() {
-      const targetTotal = parseFloat(inclusiveInput.value);
+      const rawTargetTotal = parseFloat(inclusiveInput.value);
+      const discountType = discountTypeSelect.value;
+      const discountVal = parseFloat(discountValueInput.value) || 0;
       const grossCost = parseFloat(grossCostInput.value) || 0;
       const vatPercent = parseFloat(vatRateInput.value) || 0;
       const shebaPercent = parseFloat(shebaShareInput.value) || 0;
       const spPercent = parseFloat(spShareInput.value) || 0;
 
-      if (isNaN(targetTotal) || targetTotal <= 0) {
+      if (isNaN(rawTargetTotal) || rawTargetTotal <= 0) {
+        discountRow.style.display = 'none';
+        discountAmountEl.textContent = '-৳0.00';
         baseAmountEl.textContent = '৳0.00';
         vatAmountEl.textContent = '৳0.00';
         shebaFeeAmountEl.textContent = '৳0.00';
         spGrossAmountEl.textContent = '৳0.00';
         spNetAmountEl.textContent = '৳0.00';
         finalTotalEl.textContent = '৳0.00';
-        currentBase = currentVat = currentShebaFee = currentSpGross = currentSpNet = currentTotal = 0;
+        currentOriginalTotal = currentDiscount = currentBase = currentVat = currentShebaFee = currentSpGross = currentSpNet = currentTotal = 0;
         return;
+      }
+
+      currentOriginalTotal = rawTargetTotal;
+
+      if (discountVal > 0) {
+        if (discountType === 'percent') {
+          currentDiscount = currentOriginalTotal * (discountVal / 100);
+          discountLabelEl.textContent = `Discount (${discountVal}%)`;
+        } else {
+          currentDiscount = discountVal;
+          const equivPercent = ((currentDiscount / currentOriginalTotal) * 100).toFixed(1);
+          discountLabelEl.textContent = `Discount (৳${discountVal} ≈ ${equivPercent}%)`;
+        }
+
+        // Prevent negative total
+        currentDiscount = Math.min(currentDiscount, currentOriginalTotal);
+        currentTotal = currentOriginalTotal - currentDiscount;
+        discountRow.style.display = 'flex';
+        discountAmountEl.textContent = '-৳' + currentDiscount.toFixed(2);
+      } else {
+        currentDiscount = 0;
+        currentTotal = currentOriginalTotal;
+        discountRow.style.display = 'none';
       }
 
       const vatRateDecimal = vatPercent / 100;
 
-      // Base Amount = Customer Bill / (1 + VAT Rate)
-      currentBase = targetTotal / (1 + vatRateDecimal);
-      currentVat = targetTotal - currentBase;
+      // Base Amount calculated from the final bill total
+      currentBase = currentTotal / (1 + vatRateDecimal);
+      currentVat = currentTotal - currentBase;
 
       // Split base amount according to percentage shares
       currentShebaFee = currentBase * (shebaPercent / 100);
       currentSpGross = currentBase * (spPercent / 100);
       currentSpNet = currentSpGross - grossCost;
-      currentTotal = targetTotal;
 
       // Update values in UI
       baseAmountEl.textContent = '৳' + currentBase.toFixed(2);
@@ -338,6 +431,8 @@
     }
 
     inclusiveInput.addEventListener('input', calculate);
+    discountTypeSelect.addEventListener('change', calculate);
+    discountValueInput.addEventListener('input', calculate);
     grossCostInput.addEventListener('input', calculate);
     vatRateInput.addEventListener('input', calculate);
 
@@ -355,15 +450,26 @@
     copyBtn.addEventListener('click', () => {
       if (currentTotal === 0) return;
 
-      const summary = `Order Breakdown Summary:\n` +
+      const discountVal = parseFloat(discountValueInput.value) || 0;
+      let summary = `Order Breakdown Summary:\n` +
         `--------------------\n` +
-        `Base Amount (System Entry): ৳${currentBase.toFixed(2)}\n` +
+        `Original Bill: ৳${currentOriginalTotal.toFixed(2)}\n`;
+
+      if (discountVal > 0) {
+        if (discountTypeSelect.value === 'percent') {
+          summary += `Discount (${discountVal}%): -৳${currentDiscount.toFixed(2)}\n`;
+        } else {
+          summary += `Discount (Fixed): -৳${currentDiscount.toFixed(2)}\n`;
+        }
+      }
+
+      summary += `Base Amount (System Entry): ৳${currentBase.toFixed(2)}\n` +
         `VAT (${vatRateInput.value}%): ৳${currentVat.toFixed(2)}\n` +
         `Sheba Fee (${shebaShareInput.value}%): ৳${currentShebaFee.toFixed(2)}\n` +
         `SP Share (${spShareInput.value}%): ৳${currentSpGross.toFixed(2)}\n` +
         `Gross Cost: ৳${(parseFloat(grossCostInput.value) || 0).toFixed(2)}\n` +
         `SP Net Profit: ৳${currentSpNet.toFixed(2)}\n` +
-        `Total Charged: ৳${currentTotal.toFixed(2)}`;
+        `Final Charged Total: ৳${currentTotal.toFixed(2)}`;
 
       navigator.clipboard.writeText(summary).then(() => {
         toast.classList.add('show');
