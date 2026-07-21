@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheba.xyz VAT Calculator</title>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --input-bg: #ffffff;
+      --sheba-red: #ea2b33;
+      --highlight-bg: #fef2f2;
+      --highlight-border: #fecaca;
+      --btn-bg: #f3f4f6;
+      --btn-text: #374151;
+      --copy-btn-bg: #ea2b33;
+      --copy-btn-text: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --input-bg: #0f172a;
+      --highlight-bg: #2d191e;
+      --highlight-border: #831843;
+      --btn-bg: #334155;
+      --btn-text: #f8fafc;
+      --copy-btn-bg: #ea2b33;
+      --copy-btn-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .calculator-card {
+      background: var(--card-bg);
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .brand-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .theme-toggle {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1rem;
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--sheba-red);
+    }
+
+    .results {
+      background-color: var(--highlight-bg);
+      border: 1px solid var(--highlight-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .result-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .result-row.primary .result-label {
+      color: var(--sheba-red);
+      font-weight: 700;
+    }
+
+    .result-row.primary .result-value {
+      color: var(--sheba-red);
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .copy-btn {
+      width: 100%;
+      margin-top: 16px;
+      background-color: var(--copy-btn-bg);
+      color: var(--copy-btn-text);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: #10b981;
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator-card">
+    <div class="brand-header">
+      <div class="brand-title">Partner Order & Revenue Calculator</div>
+      <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+    </div>
+
+    <!-- INCLUSIVE AMOUNT INPUT -->
+    <div class="form-group full-width" style="margin-bottom: 12px;">
+      <label for="inclusiveAmount">Desired Customer Total (incl. VAT)</label>
+      <input type="number" id="inclusiveAmount" placeholder="e.g. 400" step="any" autofocus />
+    </div>
+
+    <!-- GROSS COST AND RATES GRID -->
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="grossCost">Gross / Material Cost (৳)</label>
+        <input type="number" id="grossCost" placeholder="e.g. 150" step="any" />
+      </div>
+      <div class="form-group">
+        <label for="vatRate">VAT Rate (%)</label>
+        <input type="number" id="vatRate" value="4.3" step="0.1" />
+      </div>
+      <div class="form-group">
+        <label for="shebaShare">Sheba Fee (%)</label>
+        <input type="number" id="shebaShare" value="30" step="1" />
+      </div>
+      <div class="form-group">
+        <label for="spShare">Partner Share (%)</label>
+        <input type="number" id="spShare" value="70" step="1" />
+      </div>
+    </div>
+
+    <!-- CALCULATED RESULTS -->
+    <div class="results">
+      <div class="result-row primary">
+        <span class="result-label">Base Amount (System Entry)</span>
+        <span class="result-value" id="baseAmount">৳0.00</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">VAT Amount</span>
+        <span class="result-value" id="vatAmount">৳0.00</span>
+      </div>
+      <div class="result-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
+        <span class="result-label">Sheba Commission</span>
+        <span class="result-value" id="shebaFeeAmount">৳0.00</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Partner Revenue (Gross)</span>
+        <span class="result-value" id="spGrossAmount">৳0.00</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Partner Net Profit (excl. Gross Cost)</span>
+        <span class="result-value" id="spNetAmount" style="color: #10b981; font-weight: 700;">৳0.00</span>
+      </div>
+      <div class="result-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
+        <span class="result-label" style="font-weight: 700;">Final Bill Total</span>
+        <span class="result-value" id="finalTotal">৳0.00</span>
+      </div>
+    </div>
+
+    <button class="copy-btn" id="copyBtn">📋 Copy Summary Breakdown</button>
+  </div>
+
+  <div class="toast" id="toast">Breakdown copied to clipboard!</div>
+
+  <script>
+    // Elements
+    const inclusiveInput = document.getElementById('inclusiveAmount');
+    const grossCostInput = document.getElementById('grossCost');
+    const vatRateInput = document.getElementById('vatRate');
+    const shebaShareInput = document.getElementById('shebaShare');
+    const spShareInput = document.getElementById('spShare');
+
+    const baseAmountEl = document.getElementById('baseAmount');
+    const vatAmountEl = document.getElementById('vatAmount');
+    const shebaFeeAmountEl = document.getElementById('shebaFeeAmount');
+    const spGrossAmountEl = document.getElementById('spGrossAmount');
+    const spNetAmountEl = document.getElementById('spNetAmount');
+    const finalTotalEl = document.getElementById('finalTotal');
+
+    const themeToggle = document.getElementById('themeToggle');
+    const copyBtn = document.getElementById('copyBtn');
+    const toast = document.getElementById('toast');
+
+    let currentBase = 0, currentVat = 0, currentShebaFee = 0, currentSpGross = 0, currentSpNet = 0, currentTotal = 0;
+
+    // Synchronize Sheba % and SP % automatically
+    shebaShareInput.addEventListener('input', () => {
+      const shebaVal = parseFloat(shebaShareInput.value) || 0;
+      spShareInput.value = Math.max(0, 100 - shebaVal);
+      calculate();
+    });
+
+    spShareInput.addEventListener('input', () => {
+      const spVal = parseFloat(spShareInput.value) || 0;
+      shebaShareInput.value = Math.max(0, 100 - spVal);
+      calculate();
+    });
+
+    function calculate() {
+      const targetTotal = parseFloat(inclusiveInput.value);
+      const grossCost = parseFloat(grossCostInput.value) || 0;
+      const vatPercent = parseFloat(vatRateInput.value) || 0;
+      const shebaPercent = parseFloat(shebaShareInput.value) || 0;
+      const spPercent = parseFloat(spShareInput.value) || 0;
+
+      if (isNaN(targetTotal) || targetTotal <= 0) {
+        baseAmountEl.textContent = '৳0.00';
+        vatAmountEl.textContent = '৳0.00';
+        shebaFeeAmountEl.textContent = '৳0.00';
+        spGrossAmountEl.textContent = '৳0.00';
+        spNetAmountEl.textContent = '৳0.00';
+        finalTotalEl.textContent = '৳0.00';
+        currentBase = currentVat = currentShebaFee = currentSpGross = currentSpNet = currentTotal = 0;
+        return;
+      }
+
+      const vatRateDecimal = vatPercent / 100;
+
+      // Base Amount = Customer Bill / (1 + VAT Rate)
+      currentBase = targetTotal / (1 + vatRateDecimal);
+      currentVat = targetTotal - currentBase;
+
+      // Split base amount according to percentage shares
+      currentShebaFee = currentBase * (shebaPercent / 100);
+      currentSpGross = currentBase * (spPercent / 100);
+      currentSpNet = currentSpGross - grossCost;
+      currentTotal = targetTotal;
+
+      // Update values in UI
+      baseAmountEl.textContent = '৳' + currentBase.toFixed(2);
+      vatAmountEl.textContent = '৳' + currentVat.toFixed(2);
+      shebaFeeAmountEl.textContent = '৳' + currentShebaFee.toFixed(2);
+      spGrossAmountEl.textContent = '৳' + currentSpGross.toFixed(2);
+      spNetAmountEl.textContent = '৳' + currentSpNet.toFixed(2);
+      finalTotalEl.textContent = '৳' + currentTotal.toFixed(2);
+    }
+
+    inclusiveInput.addEventListener('input', calculate);
+    grossCostInput.addEventListener('input', calculate);
+    vatRateInput.addEventListener('input', calculate);
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.body.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙 Dark';
+      } else {
+        document.body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️ Light';
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      if (currentTotal === 0) return;
+
+      const summary = `Order Breakdown Summary:\n` +
+        `--------------------\n` +
+        `Base Amount (System Entry): ৳${currentBase.toFixed(2)}\n` +
+        `VAT (${vatRateInput.value}%): ৳${currentVat.toFixed(2)}\n` +
+        `Sheba Fee (${shebaShareInput.value}%): ৳${currentShebaFee.toFixed(2)}\n` +
+        `SP Share (${spShareInput.value}%): ৳${currentSpGross.toFixed(2)}\n` +
+        `Gross Cost: ৳${(parseFloat(grossCostInput.value) || 0).toFixed(2)}\n` +
+        `SP Net Profit: ৳${currentSpNet.toFixed(2)}\n` +
+        `Total Charged: ৳${currentTotal.toFixed(2)}`;
+
+      navigator.clipboard.writeText(summary).then(() => {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    });
+  </script>
+
+</body>
+</html>
