@@ -314,8 +314,12 @@
       <!-- Primary Inputs -->
       <div class="form-grid">
         <div class="form-group">
-          <label for="refillTarget">Target Total Bill (incl. VAT)</label>
+          <label for="refillTarget" id="targetLabel">Target Amount</label>
           <input type="number" id="refillTarget" placeholder="e.g. 1000" step="any" autofocus />
+          <div class="toggle-type">
+            <button class="toggle-btn" id="btnTargetExcl" onclick="setTargetType('excl')">Excl. VAT (Base)</button>
+            <button class="toggle-btn active" id="btnTargetIncl" onclick="setTargetType('incl')">Incl. VAT (Total)</button>
+          </div>
         </div>
         <div class="form-group">
           <label for="vatRate">Custom VAT Rate (%)</label>
@@ -426,6 +430,7 @@
     const themeToggle = document.getElementById('themeToggle');
     const toast = document.getElementById('toast');
 
+    let targetType = 'incl'; // 'incl' or 'excl'
     let existingType = 'base';
     let exactRefillBase = 0;
     let summaryText = "";
@@ -437,6 +442,13 @@
       return isNeg ? '-' + formatted : formatted;
     };
 
+    function setTargetType(type) {
+      targetType = type;
+      document.getElementById('btnTargetExcl').classList.toggle('active', type === 'excl');
+      document.getElementById('btnTargetIncl').classList.toggle('active', type === 'incl');
+      calculate();
+    }
+
     function setExistingType(type) {
       existingType = type;
       document.getElementById('btnExistingBase').classList.toggle('active', type === 'base');
@@ -444,21 +456,16 @@
       calculate();
     }
 
-    // UPDATED SMART MATH & PERCENTAGE PARSER
     function parseSumExpression(expr) {
       if (!expr) return 0;
 
       let sanitized = expr.trim();
       
-      // Convert pattern like "1000 - 4.3%" into "1000 - (1000 * 0.043)"
       sanitized = sanitized.replace(/(\d+(?:\.\d+)?)\s*([\+\-])\s*(\d+(?:\.\d+)?)%/g, (match, base, op, pct) => {
         return `${base} ${op} (${base} * (${pct} / 100))`;
       });
 
-      // Convert standalone percentage like "4.3%" into "(4.3 / 100)"
       sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 / 100)');
-
-      // Sanitize remaining characters
       sanitized = sanitized.replace(/[^0-9\+\-\*\/\.\s\(\)]/g, '');
       if (!sanitized.trim()) return 0;
 
@@ -470,7 +477,6 @@
       }
     }
 
-    // Auto-balance rates to sum to 100%
     shebaCommRateInput.addEventListener('input', () => {
       const commVal = parseFloat(shebaCommRateInput.value) || 0;
       partnerShareRateInput.value = Math.max(0, 100 - commVal).toFixed(1);
@@ -492,23 +498,34 @@
       manualExpressionEl.textContent = manualAddInput.value.trim() || '-';
       manualSumResultEl.textContent = formatBDT(manualMathResult);
 
-      const targetBill = parseFloat(refillTargetInput.value) || 0;
+      const targetInputValue = parseFloat(refillTargetInput.value) || 0;
       const rawExistingSum = parseSumExpression(refillExistingInput.value);
 
       let existingBase = rawExistingSum;
       if (existingType === 'incl') {
-        existingBase = rawExistingSum / (1 + vatRateDecimal);
+        existingBase = rawExistingSum - (rawExistingSum * vatRateDecimal);
       }
 
       refillCurrentBaseEl.textContent = formatBDT(existingBase);
 
       let netBaseEvaluated = 0;
       let totalVat = 0;
+      let grossBill = 0;
 
-      if (targetBill > 0) {
-        netBaseEvaluated = targetBill / (1 + vatRateDecimal);
+      if (targetInputValue > 0) {
+        if (targetType === 'excl') {
+          // Input is Base Amount (Excl. VAT)
+          netBaseEvaluated = targetInputValue;
+          totalVat = netBaseEvaluated * vatRateDecimal; // e.g. 1000 * 4.3% = 43.00
+          grossBill = netBaseEvaluated + totalVat;     // 1043.00
+        } else {
+          // Direct percentage reduction logic (1000 - 43 = 957)
+          grossBill = targetInputValue;
+          totalVat = grossBill * vatRateDecimal;       // e.g. 1000 * 4.3% = 43.00
+          netBaseEvaluated = grossBill - totalVat;     // 1000 - 43 = 957.00
+        }
+
         exactRefillBase = Math.max(0, netBaseEvaluated - existingBase);
-        totalVat = targetBill - netBaseEvaluated;
 
         refillAutoVatEl.textContent = formatBDT(totalVat);
         refillSystemBaseEl.textContent = formatBDT(exactRefillBase);
@@ -519,7 +536,7 @@
         refillSystemBaseEl.textContent = formatBDT(0);
       }
 
-      // Strictly Excl. VAT Commission Split Calculations
+      // Commission Split Calculations
       const commPercent = parseFloat(shebaCommRateInput.value) || 0;
       const partnerPercent = parseFloat(partnerShareRateInput.value) || 0;
 
@@ -533,10 +550,9 @@
       partnerShareAmountEl.textContent = formatBDT(partnerTakeBDT);
       totalCostBaseEl.textContent = formatBDT(netBaseEvaluated);
 
-      // Prepare Copy All Summary Text
       summaryText = `📊 SHEBA BILL SUMMARY\n` +
         `--------------------------\n` +
-        `Target Gross Bill: ${formatBDT(targetBill)}\n` +
+        `Target Gross Bill: ${formatBDT(grossBill)}\n` +
         `Manual Calculation (${manualAddInput.value.trim() || '0'}): ${formatBDT(manualMathResult)}\n` +
         `Net Base (Excl. VAT): ${formatBDT(netBaseEvaluated)}\n` +
         `VAT (${customVatPercent}%): ${formatBDT(totalVat)}\n` +
