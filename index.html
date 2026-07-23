@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sheba.xyz VAT Calculator</title>
+  <title>Sheba.xyz Pro VAT Calculator</title>
   <style>
     :root {
       --bg: #f3f4f6;
@@ -19,6 +19,12 @@
       --btn-text: #374151;
       --copy-btn-bg: #ea2b33;
       --copy-btn-text: #ffffff;
+      --blue-bg: #eff6ff;
+      --blue-border: #bfdbfe;
+      --blue-text: #1d4ed8;
+      --green-bg: #ecfdf5;
+      --green-border: #a7f3d0;
+      --green-text: #047857;
     }
 
     [data-theme="dark"] {
@@ -34,6 +40,12 @@
       --btn-text: #f8fafc;
       --copy-btn-bg: #ea2b33;
       --copy-btn-text: #ffffff;
+      --blue-bg: #1e3a8a22;
+      --blue-border: #1e40af;
+      --blue-text: #60a5fa;
+      --green-bg: #064e3b22;
+      --green-border: #047857;
+      --green-text: #34d399;
     }
 
     * {
@@ -59,7 +71,7 @@
       border-radius: 16px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 460px;
+      max-width: 520px;
     }
 
     .brand-header {
@@ -99,51 +111,121 @@
       flex-direction: column;
     }
 
-    .form-group.full-width {
-      grid-column: span 2;
+    .refill-box {
+      background-color: var(--blue-bg);
+      border: 1.5px dashed var(--blue-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
 
-    .discount-box {
-      background: var(--btn-bg);
-      padding: 12px;
-      border-radius: 10px;
+    .refill-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--blue-text);
+      margin-bottom: 12px;
+    }
+
+    .refill-output-grid {
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
-
-    .discount-header {
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .discount-header label {
-      margin-bottom: 0;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .discount-inputs {
-      display: grid;
-      grid-template-columns: 100px 1fr;
+      flex-direction: column;
       gap: 8px;
     }
 
-    select {
+    .refill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .refill-row.calc-sum-row {
+      background-color: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #15803d;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    [data-theme="dark"] .refill-row.calc-sum-row {
+      background-color: #052e1644;
+      border-color: #166534;
+      color: #4ade80;
+    }
+
+    .refill-row.highlight {
+      background-color: var(--green-bg);
+      border: 1px solid var(--green-border);
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 4px;
+    }
+
+    .refill-row.highlight .refill-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--green-text);
+    }
+
+    .mini-copy-btn {
+      background: var(--green-text);
+      color: #fff;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .toggle-type {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+      background: var(--btn-bg);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .toggle-btn.active {
+      background: var(--card-bg);
+      color: var(--sheba-red);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    select, input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 10px;
-      font-size: 0.9rem;
+      padding: 10px 12px;
+      font-size: 0.95rem;
       font-weight: 600;
       background: var(--input-bg);
       color: var(--text-main);
       border: 1px solid var(--border);
       border-radius: 8px;
       outline: none;
-      cursor: pointer;
     }
 
-    select:focus {
+    select:focus, input[type="text"]:focus, input[type="number"]:focus {
       border-color: var(--sheba-red);
     }
 
@@ -152,72 +234,6 @@
       font-weight: 600;
       margin-bottom: 6px;
       color: var(--text-muted);
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 10px 14px;
-      font-size: 1rem;
-      background: var(--input-bg);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      outline: none;
-    }
-
-    input[type="number"]:focus {
-      border-color: var(--sheba-red);
-    }
-
-    .results {
-      background-color: var(--highlight-bg);
-      border: 1px solid var(--highlight-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .result-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .result-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .result-value {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .result-row.primary .result-label {
-      color: var(--sheba-red);
-      font-weight: 700;
-    }
-
-    .result-row.primary .result-value {
-      color: var(--sheba-red);
-      font-size: 1.25rem;
-      font-weight: 800;
-    }
-
-    .copy-btn {
-      width: 100%;
-      margin-top: 16px;
-      background-color: var(--copy-btn-bg);
-      color: var(--copy-btn-text);
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
     }
 
     .toast {
@@ -233,6 +249,7 @@
       font-weight: 600;
       opacity: 0;
       transition: transform 0.3s, opacity 0.3s;
+      z-index: 999;
     }
 
     .toast.show {
@@ -249,192 +266,148 @@
       <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
     </div>
 
-    <!-- INCLUSIVE AMOUNT INPUT -->
-    <div class="form-group full-width" style="margin-bottom: 12px;">
-      <label for="inclusiveAmount">Original Customer Total (incl. VAT)</label>
-      <input type="number" id="inclusiveAmount" placeholder="e.g. 400" step="any" autofocus />
-    </div>
+    <!-- REFILL BILL AUTOMATION BOX -->
+    <div class="refill-box">
+      <div class="refill-title">⚡ Multi-Item Bill Refill Automation</div>
+      
+      <div class="form-grid" style="margin-bottom: 12px;">
+        <div class="form-group">
+          <label for="refillTarget">Target Total Bill (incl. VAT)</label>
+          <input type="number" id="refillTarget" placeholder="e.g. 2400" step="any" autofocus />
+        </div>
+        <div class="form-group">
+          <label for="vatRate">Custom VAT Rate (%)</label>
+          <input type="number" id="vatRate" value="4.3" step="0.1" placeholder="4.3" />
+        </div>
+      </div>
 
-    <!-- ADVANCED EDITABLE DISCOUNT SECTION -->
-    <div class="discount-box">
-      <div class="discount-header">
-        <label>Custom Discount</label>
+      <div class="form-grid" style="margin-bottom: 0;">
+        <div class="form-group">
+          <label for="refillExisting">Existing System Entry Items</label>
+          <input type="text" id="refillExisting" placeholder="100 + 100" />
+          <div class="toggle-type">
+            <button class="toggle-btn active" id="btnExistingBase" onclick="setExistingType('base')">Excl. VAT (Base)</button>
+            <button class="toggle-btn" id="btnExistingIncl" onclick="setExistingType('incl')">Incl. VAT</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="manualAddInput">Manual Addition (Sum)</label>
+          <input type="text" id="manualAddInput" placeholder="671 + 700" value="671 + 700" />
+        </div>
       </div>
-      <div class="discount-inputs">
-        <select id="discountType">
-          <option value="percent">Percent (%)</option>
-          <option value="fixed">Fixed (৳)</option>
-        </select>
-        <input type="number" id="discountValue" placeholder="e.g. 10" step="any" min="0" />
-      </div>
-    </div>
 
-    <!-- GROSS COST AND RATES GRID -->
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="grossCost">Gross / Material Cost (৳)</label>
-        <input type="number" id="grossCost" placeholder="e.g. 150" step="any" />
-      </div>
-      <div class="form-group">
-        <label for="vatRate">VAT Rate (%)</label>
-        <input type="number" id="vatRate" value="4.3" step="0.1" />
-      </div>
-      <div class="form-group">
-        <label for="shebaShare">Sheba Fee (%)</label>
-        <input type="number" id="shebaShare" value="30" step="1" />
-      </div>
-      <div class="form-group">
-        <label for="spShare">Partner Share (%)</label>
-        <input type="number" id="spShare" value="70" step="1" />
-      </div>
-    </div>
+      <div class="refill-output-grid">
+        <!-- MANUAL CALCULATION ROW -->
+        <div class="refill-row calc-sum-row">
+          <span>Manual Sum (<span id="manualExpression">671 + 700</span>):</span>
+          <span id="manualSumResult" style="font-size: 1.05rem; font-weight: 800;">৳1,371.00</span>
+        </div>
 
-    <!-- CALCULATED RESULTS -->
-    <div class="results">
-      <div class="result-row" id="discountRow" style="display: none; color: #ef4444;">
-        <span class="result-label" id="discountLabel" style="color: #ef4444; font-weight: 600;">Discount</span>
-        <span class="result-value" id="discountAmount">-৳0.00</span>
-      </div>
-      <div class="result-row primary">
-        <span class="result-label">Base Amount (System Entry)</span>
-        <span class="result-value" id="baseAmount">৳0.00</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">VAT Amount</span>
-        <span class="result-value" id="vatAmount">৳0.00</span>
-      </div>
-      <div class="result-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
-        <span class="result-label">Sheba Commission</span>
-        <span class="result-value" id="shebaFeeAmount">৳0.00</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">Partner Revenue (Gross)</span>
-        <span class="result-value" id="spGrossAmount">৳0.00</span>
-      </div>
-      <div class="result-row">
-        <span class="result-label">Partner Net Profit (excl. Cost)</span>
-        <span class="result-value" id="spNetAmount" style="color: #10b981; font-weight: 700;">৳0.00</span>
-      </div>
-      <div class="result-row" style="border-top: 1px dashed var(--border); padding-top: 8px;">
-        <span class="result-label" style="font-weight: 700;">Final Bill Total</span>
-        <span class="result-value" id="finalTotal">৳0.00</span>
+        <div class="refill-row">
+          <span style="color: var(--text-muted);">Existing System Base:</span>
+          <span id="refillCurrentBase" style="font-weight: 700;">৳0.00</span>
+        </div>
+        <div class="refill-row">
+          <span style="color: var(--text-muted);">Total Auto VAT (<span id="vatRateDisplay">4.3%</span>):</span>
+          <span id="refillAutoVat" style="font-weight: 700;">৳0.00</span>
+        </div>
+        <div class="refill-row highlight">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--green-text); font-weight: 700;">Type New Base Entry into System:</div>
+            <div class="refill-val" id="refillSystemBase">৳0.00</div>
+          </div>
+          <button class="mini-copy-btn" id="copyRefillBaseBtn">Copy Base</button>
+        </div>
       </div>
     </div>
-
-    <button class="copy-btn" id="copyBtn">📋 Copy Summary Breakdown</button>
   </div>
 
-  <div class="toast" id="toast">Breakdown copied to clipboard!</div>
+  <div class="toast" id="toast">Copied to clipboard!</div>
 
   <script>
-    // Elements
-    const inclusiveInput = document.getElementById('inclusiveAmount');
-    const discountTypeSelect = document.getElementById('discountType');
-    const discountValueInput = document.getElementById('discountValue');
-    const grossCostInput = document.getElementById('grossCost');
+    const refillTargetInput = document.getElementById('refillTarget');
     const vatRateInput = document.getElementById('vatRate');
-    const shebaShareInput = document.getElementById('shebaShare');
-    const spShareInput = document.getElementById('spShare');
+    const refillExistingInput = document.getElementById('refillExisting');
+    const manualAddInput = document.getElementById('manualAddInput');
 
-    const discountRow = document.getElementById('discountRow');
-    const discountLabelEl = document.getElementById('discountLabel');
-    const discountAmountEl = document.getElementById('discountAmount');
-    const baseAmountEl = document.getElementById('baseAmount');
-    const vatAmountEl = document.getElementById('vatAmount');
-    const shebaFeeAmountEl = document.getElementById('shebaFeeAmount');
-    const spGrossAmountEl = document.getElementById('spGrossAmount');
-    const spNetAmountEl = document.getElementById('spNetAmount');
-    const finalTotalEl = document.getElementById('finalTotal');
+    const manualExpressionEl = document.getElementById('manualExpression');
+    const manualSumResultEl = document.getElementById('manualSumResult');
+    const vatRateDisplayEl = document.getElementById('vatRateDisplay');
+
+    const refillCurrentBaseEl = document.getElementById('refillCurrentBase');
+    const refillAutoVatEl = document.getElementById('refillAutoVat');
+    const refillSystemBaseEl = document.getElementById('refillSystemBase');
+    const copyRefillBaseBtn = document.getElementById('copyRefillBaseBtn');
 
     const themeToggle = document.getElementById('themeToggle');
-    const copyBtn = document.getElementById('copyBtn');
     const toast = document.getElementById('toast');
 
-    let currentOriginalTotal = 0, currentDiscount = 0, currentBase = 0, currentVat = 0, currentShebaFee = 0, currentSpGross = 0, currentSpNet = 0, currentTotal = 0;
+    let existingType = 'base'; // 'base' or 'incl'
+    let exactRefillBase = 0;
 
-    // Synchronize Sheba % and SP % automatically
-    shebaShareInput.addEventListener('input', () => {
-      const shebaVal = parseFloat(shebaShareInput.value) || 0;
-      spShareInput.value = Math.max(0, 100 - shebaVal);
+    const formatBDT = (val) => '৳' + (val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function setExistingType(type) {
+      existingType = type;
+      document.getElementById('btnExistingBase').classList.toggle('active', type === 'base');
+      document.getElementById('btnExistingIncl').classList.toggle('active', type === 'incl');
       calculate();
-    });
-
-    spShareInput.addEventListener('input', () => {
-      const spVal = parseFloat(spShareInput.value) || 0;
-      shebaShareInput.value = Math.max(0, 100 - spVal);
-      calculate();
-    });
-
-    function calculate() {
-      const rawTargetTotal = parseFloat(inclusiveInput.value);
-      const discountType = discountTypeSelect.value;
-      const discountVal = parseFloat(discountValueInput.value) || 0;
-      const grossCost = parseFloat(grossCostInput.value) || 0;
-      const vatPercent = parseFloat(vatRateInput.value) || 0;
-      const shebaPercent = parseFloat(shebaShareInput.value) || 0;
-      const spPercent = parseFloat(spShareInput.value) || 0;
-
-      if (isNaN(rawTargetTotal) || rawTargetTotal <= 0) {
-        discountRow.style.display = 'none';
-        discountAmountEl.textContent = '-৳0.00';
-        baseAmountEl.textContent = '৳0.00';
-        vatAmountEl.textContent = '৳0.00';
-        shebaFeeAmountEl.textContent = '৳0.00';
-        spGrossAmountEl.textContent = '৳0.00';
-        spNetAmountEl.textContent = '৳0.00';
-        finalTotalEl.textContent = '৳0.00';
-        currentOriginalTotal = currentDiscount = currentBase = currentVat = currentShebaFee = currentSpGross = currentSpNet = currentTotal = 0;
-        return;
-      }
-
-      currentOriginalTotal = rawTargetTotal;
-
-      if (discountVal > 0) {
-        if (discountType === 'percent') {
-          currentDiscount = currentOriginalTotal * (discountVal / 100);
-          discountLabelEl.textContent = `Discount (${discountVal}%)`;
-        } else {
-          currentDiscount = discountVal;
-          const equivPercent = ((currentDiscount / currentOriginalTotal) * 100).toFixed(1);
-          discountLabelEl.textContent = `Discount (৳${discountVal} ≈ ${equivPercent}%)`;
-        }
-
-        // Prevent negative total
-        currentDiscount = Math.min(currentDiscount, currentOriginalTotal);
-        currentTotal = currentOriginalTotal - currentDiscount;
-        discountRow.style.display = 'flex';
-        discountAmountEl.textContent = '-৳' + currentDiscount.toFixed(2);
-      } else {
-        currentDiscount = 0;
-        currentTotal = currentOriginalTotal;
-        discountRow.style.display = 'none';
-      }
-
-      const vatRateDecimal = vatPercent / 100;
-
-      // Base Amount calculated from the final bill total
-      currentBase = currentTotal / (1 + vatRateDecimal);
-      currentVat = currentTotal - currentBase;
-
-      // Split base amount according to percentage shares
-      currentShebaFee = currentBase * (shebaPercent / 100);
-      currentSpGross = currentBase * (spPercent / 100);
-      currentSpNet = currentSpGross - grossCost;
-
-      // Update values in UI
-      baseAmountEl.textContent = '৳' + currentBase.toFixed(2);
-      vatAmountEl.textContent = '৳' + currentVat.toFixed(2);
-      shebaFeeAmountEl.textContent = '৳' + currentShebaFee.toFixed(2);
-      spGrossAmountEl.textContent = '৳' + currentSpGross.toFixed(2);
-      spNetAmountEl.textContent = '৳' + currentSpNet.toFixed(2);
-      finalTotalEl.textContent = '৳' + currentTotal.toFixed(2);
     }
 
-    inclusiveInput.addEventListener('input', calculate);
-    discountTypeSelect.addEventListener('change', calculate);
-    discountValueInput.addEventListener('input', calculate);
-    grossCostInput.addEventListener('input', calculate);
-    vatRateInput.addEventListener('input', calculate);
+    function parseSumExpression(expr) {
+      if (!expr) return 0;
+      const parts = expr.split(/[\+\s]+/).map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
+      return parts.reduce((acc, curr) => acc + curr, 0);
+    }
+
+    function calculate() {
+      // Custom VAT percentage
+      const customVatPercent = parseFloat(vatRateInput.value) || 0;
+      const vatRateDecimal = customVatPercent / 100;
+      vatRateDisplayEl.textContent = `${customVatPercent}%`;
+
+      // Manual addition calculation
+      const manualSum = parseSumExpression(manualAddInput.value);
+      manualExpressionEl.textContent = manualAddInput.value.trim() || '0';
+      manualSumResultEl.textContent = formatBDT(manualSum);
+
+      const targetBill = parseFloat(refillTargetInput.value) || 0;
+      const rawExistingSum = parseSumExpression(refillExistingInput.value);
+
+      let existingBase = rawExistingSum;
+      if (existingType === 'incl') {
+        existingBase = rawExistingSum / (1 + vatRateDecimal);
+      }
+
+      refillCurrentBaseEl.textContent = formatBDT(existingBase);
+
+      if (targetBill > 0) {
+        const totalBaseNeeded = targetBill / (1 + vatRateDecimal);
+        exactRefillBase = Math.max(0, totalBaseNeeded - existingBase);
+        const totalVat = targetBill - (existingBase + exactRefillBase);
+
+        refillAutoVatEl.textContent = formatBDT(totalVat);
+        refillSystemBaseEl.textContent = formatBDT(exactRefillBase);
+      } else {
+        exactRefillBase = 0;
+        refillAutoVatEl.textContent = formatBDT(0);
+        refillSystemBaseEl.textContent = formatBDT(0);
+      }
+    }
+
+    [refillTargetInput, vatRateInput, refillExistingInput, manualAddInput].forEach(el => {
+      el.addEventListener('input', calculate);
+      el.addEventListener('change', calculate);
+    });
+
+    copyRefillBaseBtn.addEventListener('click', () => {
+      if (exactRefillBase <= 0) return;
+      navigator.clipboard.writeText(exactRefillBase.toFixed(2)).then(() => {
+        toast.textContent = `Copied System Entry: ৳${exactRefillBase.toFixed(2)}`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    });
 
     themeToggle.addEventListener('click', () => {
       const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -447,35 +420,8 @@
       }
     });
 
-    copyBtn.addEventListener('click', () => {
-      if (currentTotal === 0) return;
-
-      const discountVal = parseFloat(discountValueInput.value) || 0;
-      let summary = `Order Breakdown Summary:\n` +
-        `--------------------\n` +
-        `Original Bill: ৳${currentOriginalTotal.toFixed(2)}\n`;
-
-      if (discountVal > 0) {
-        if (discountTypeSelect.value === 'percent') {
-          summary += `Discount (${discountVal}%): -৳${currentDiscount.toFixed(2)}\n`;
-        } else {
-          summary += `Discount (Fixed): -৳${currentDiscount.toFixed(2)}\n`;
-        }
-      }
-
-      summary += `Base Amount (System Entry): ৳${currentBase.toFixed(2)}\n` +
-        `VAT (${vatRateInput.value}%): ৳${currentVat.toFixed(2)}\n` +
-        `Sheba Fee (${shebaShareInput.value}%): ৳${currentShebaFee.toFixed(2)}\n` +
-        `SP Share (${spShareInput.value}%): ৳${currentSpGross.toFixed(2)}\n` +
-        `Gross Cost: ৳${(parseFloat(grossCostInput.value) || 0).toFixed(2)}\n` +
-        `SP Net Profit: ৳${currentSpNet.toFixed(2)}\n` +
-        `Final Charged Total: ৳${currentTotal.toFixed(2)}`;
-
-      navigator.clipboard.writeText(summary).then(() => {
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-      });
-    });
+    // Initial calculation run
+    calculate();
   </script>
 
 </body>
