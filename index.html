@@ -326,15 +326,15 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="refillExisting">Existing System Entry Items</label>
-          <input type="text" id="refillExisting" placeholder="100 + 100" />
+          <input type="text" id="refillExisting" placeholder="e.g. 100 + 100" />
           <div class="toggle-type">
             <button class="toggle-btn active" id="btnExistingBase" onclick="setExistingType('base')">Excl. VAT (Base)</button>
             <button class="toggle-btn" id="btnExistingIncl" onclick="setExistingType('incl')">Incl. VAT</button>
           </div>
         </div>
         <div class="form-group">
-          <label for="manualAddInput">Manual Addition (Sum)</label>
-          <input type="text" id="manualAddInput" placeholder="671 + 700" value="671 + 700" />
+          <label for="manualAddInput">Manual Math Addition/Subtraction</label>
+          <input type="text" id="manualAddInput" placeholder="e.g. 671 - 700 or 1 + 1" value="" />
         </div>
       </div>
 
@@ -355,8 +355,8 @@
       <div class="refill-output-grid">
         <!-- MANUAL CALCULATION ROW -->
         <div class="refill-row calc-sum-row">
-          <span>Manual Sum (<span id="manualExpression">671 + 700</span>):</span>
-          <span id="manualSumResult" style="font-size: 1.05rem; font-weight: 800;">৳1,371.00</span>
+          <span>Manual Calculation (<span id="manualExpression">-</span>):</span>
+          <span id="manualSumResult" style="font-size: 1.05rem; font-weight: 800;">৳0.00</span>
         </div>
 
         <div class="refill-row">
@@ -430,7 +430,12 @@
     let exactRefillBase = 0;
     let summaryText = "";
 
-    const formatBDT = (val) => '৳' + (val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatBDT = (val) => {
+      const isNeg = val < 0;
+      const absVal = Math.abs(val || 0);
+      const formatted = '৳' + absVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return isNeg ? '-' + formatted : formatted;
+    };
 
     function setExistingType(type) {
       existingType = type;
@@ -439,10 +444,17 @@
       calculate();
     }
 
+    // Safely handles +, -, *, /
     function parseSumExpression(expr) {
       if (!expr) return 0;
-      const parts = expr.split(/[\+\s]+/).map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-      return parts.reduce((acc, curr) => acc + curr, 0);
+      const sanitized = expr.replace(/[^0-9\+\-\*\/\.\s]/g, '');
+      if (!sanitized.trim()) return 0;
+      try {
+        const result = new Function(`return (${sanitized})`)();
+        return isNaN(result) || !isFinite(result) ? 0 : result;
+      } catch (e) {
+        return 0;
+      }
     }
 
     // Auto-balance rates to sum to 100%
@@ -463,9 +475,9 @@
       const vatRateDecimal = customVatPercent / 100;
       vatRateDisplayEl.textContent = `${customVatPercent}%`;
 
-      const manualSum = parseSumExpression(manualAddInput.value);
-      manualExpressionEl.textContent = manualAddInput.value.trim() || '0';
-      manualSumResultEl.textContent = formatBDT(manualSum);
+      const manualMathResult = parseSumExpression(manualAddInput.value);
+      manualExpressionEl.textContent = manualAddInput.value.trim() || '-';
+      manualSumResultEl.textContent = formatBDT(manualMathResult);
 
       const targetBill = parseFloat(refillTargetInput.value) || 0;
       const rawExistingSum = parseSumExpression(refillExistingInput.value);
@@ -489,7 +501,7 @@
         refillSystemBaseEl.textContent = formatBDT(exactRefillBase);
       } else {
         exactRefillBase = 0;
-        netBaseEvaluated = manualSum;
+        netBaseEvaluated = manualMathResult;
         refillAutoVatEl.textContent = formatBDT(0);
         refillSystemBaseEl.textContent = formatBDT(0);
       }
@@ -512,7 +524,7 @@
       summaryText = `📊 SHEBA BILL SUMMARY\n` +
         `--------------------------\n` +
         `Target Gross Bill: ${formatBDT(targetBill)}\n` +
-        `Manual Sum (${manualAddInput.value.trim() || '0'}): ${formatBDT(manualSum)}\n` +
+        `Manual Calculation (${manualAddInput.value.trim() || '0'}): ${formatBDT(manualMathResult)}\n` +
         `Net Base (Excl. VAT): ${formatBDT(netBaseEvaluated)}\n` +
         `VAT (${customVatPercent}%): ${formatBDT(totalVat)}\n` +
         `--------------------------\n` +
