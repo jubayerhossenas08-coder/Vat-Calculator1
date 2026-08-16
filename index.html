@@ -1,603 +1,531 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sheba.xyz Pro VAT & Split Calculator</title>
-  <style>
-    :root {
-      --bg: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --input-bg: #ffffff;
-      --sheba-red: #ea2b33;
-      --highlight-bg: #fef2f2;
-      --highlight-border: #fecaca;
-      --btn-bg: #f3f4f6;
-      --btn-text: #374151;
-      --copy-btn-bg: #ea2b33;
-      --copy-btn-text: #ffffff;
-      --blue-bg: #eff6ff;
-      --blue-border: #bfdbfe;
-      --blue-text: #1d4ed8;
-      --green-bg: #ecfdf5;
-      --green-border: #a7f3d0;
-      --green-text: #047857;
-      --purple-bg: #faf5ff;
-      --purple-border: #e9d5ff;
-      --purple-text: #6b21a8;
-    }
-
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --input-bg: #0f172a;
-      --btn-bg: #334155;
-      --btn-text: #f8fafc;
-      --blue-bg: #1e3a8a22;
-      --blue-border: #1e40af;
-      --blue-text: #60a5fa;
-      --green-bg: #064e3b22;
-      --green-border: #047857;
-      --green-text: #34d399;
-      --purple-bg: #3b076422;
-      --purple-border: #7e22ce;
-      --purple-text: #c084fc;
-    }
-
-    * {
-      box-sizing: border-box;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 16px;
-    }
-
-    .calculator-card {
-      background: var(--card-bg);
-      padding: 28px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 540px;
-    }
-
-    .brand-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .brand-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-    }
-
-    .theme-toggle {
-      background: var(--btn-bg);
-      color: var(--btn-text);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .refill-box {
-      background-color: var(--blue-bg);
-      border: 1.5px dashed var(--blue-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .refill-title {
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: var(--blue-text);
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--purple-text);
-      margin-top: 16px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .refill-output-grid {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .refill-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-
-    .refill-row.calc-sum-row {
-      background-color: #f0fdf4;
-      border: 1.5px solid #bbf7d0;
-      padding: 8px 10px;
-      border-radius: 8px;
-      color: #15803d;
-      font-weight: 700;
-    }
-
-    [data-theme="dark"] .refill-row.calc-sum-row {
-      background-color: #052e1644;
-      border-color: #166534;
-      color: #4ade80;
-    }
-
-    .refill-row.split-row {
-      background-color: var(--purple-bg);
-      border: 1px solid var(--purple-border);
-      padding: 8px 10px;
-      border-radius: 8px;
-      color: var(--purple-text);
-      font-weight: 700;
-    }
-
-    .refill-row.highlight {
-      background-color: var(--green-bg);
-      border: 1px solid var(--green-border);
-      padding: 8px 10px;
-      border-radius: 8px;
-      margin-top: 4px;
-    }
-
-    .refill-row.highlight .refill-val {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--green-text);
-    }
-
-    .mini-copy-btn {
-      background: var(--green-text);
-      color: #fff;
-      border: none;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .copy-summary-btn {
-      width: 100%;
-      margin-top: 8px;
-      background-color: var(--sheba-red);
-      color: #ffffff;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .copy-summary-btn:hover {
-      opacity: 0.9;
-    }
-
-    .toggle-type {
-      display: flex;
-      gap: 4px;
-      margin-top: 4px;
-      background: var(--btn-bg);
-      padding: 2px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .toggle-btn {
-      flex: 1;
-      padding: 4px 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .toggle-btn.active {
-      background: var(--card-bg);
-      color: var(--sheba-red);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    select, input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      background: var(--input-bg);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      outline: none;
-    }
-
-    select:focus, input[type="text"]:focus, input[type="number"]:focus {
-      border-color: var(--sheba-red);
-    }
-
-    label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-muted);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background-color: #10b981;
-      color: #ffffff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      opacity: 0;
-      transition: transform 0.3s, opacity 0.3s;
-      z-index: 999;
-    }
-
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="calculator-card">
-    <div class="brand-header">
-      <div class="brand-title">Sheba.xyz Pro VAT Calculator</div>
-      <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
-    </div>
-
-    <!-- REFILL BILL AUTOMATION BOX -->
-    <div class="refill-box">
-      <div class="refill-title">⚡ Multi-Item Bill Refill Automation</div>
-      
-      <!-- Primary Inputs -->
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="refillTarget" id="targetLabel">Target Amount</label>
-          <input type="number" id="refillTarget" placeholder="e.g. 1000" step="any" autofocus />
-          <div class="toggle-type">
-            <button class="toggle-btn" id="btnTargetExcl" onclick="setTargetType('excl')">Excl. VAT (Base)</button>
-            <button class="toggle-btn active" id="btnTargetIncl" onclick="setTargetType('incl')">Incl. VAT (Total)</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="vatRate">Custom VAT Rate (%)</label>
-          <input type="number" id="vatRate" value="4.3" step="0.1" placeholder="4.3" />
-        </div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="refillExisting">Existing System Entry Items</label>
-          <input type="text" id="refillExisting" placeholder="e.g. 100 + 100" />
-          <div class="toggle-type">
-            <button class="toggle-btn active" id="btnExistingBase" onclick="setExistingType('base')">Excl. VAT (Base)</button>
-            <button class="toggle-btn" id="btnExistingIncl" onclick="setExistingType('incl')">Incl. VAT</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="manualAddInput">Manual Math / Percentage</label>
-          <input type="text" id="manualAddInput" placeholder="e.g. 1000 - 4.3% or 671 - 700" value="" />
-        </div>
-      </div>
-
-      <!-- Commission Split Inputs -->
-      <div class="section-title">🤝 Net Split (Excl. VAT)</div>
-      <div class="form-grid" style="margin-bottom: 0;">
-        <div class="form-group">
-          <label for="shebaCommRate">Sheba Commission (%)</label>
-          <input type="number" id="shebaCommRate" value="30" step="0.5" placeholder="30" />
-        </div>
-        <div class="form-group">
-          <label for="partnerShareRate">Partner Take (%)</label>
-          <input type="number" id="partnerShareRate" value="70" step="0.5" placeholder="70" />
-        </div>
-      </div>
-
-      <!-- Breakdown Display -->
-      <div class="refill-output-grid">
-        <!-- MANUAL CALCULATION ROW -->
-        <div class="refill-row calc-sum-row">
-          <span>Manual Calculation (<span id="manualExpression">-</span>):</span>
-          <span id="manualSumResult" style="font-size: 1.05rem; font-weight: 800;">৳0.00</span>
-        </div>
-
-        <div class="refill-row">
-          <span style="color: var(--text-muted);">Existing System Base:</span>
-          <span id="refillCurrentBase" style="font-weight: 700;">৳0.00</span>
-        </div>
-        <div class="refill-row">
-          <span style="color: var(--text-muted);">Total Auto VAT (<span id="vatRateDisplay">4.3%</span>):</span>
-          <span id="refillAutoVat" style="font-weight: 700;">৳0.00</span>
-        </div>
-
-        <div class="refill-row highlight">
-          <div>
-            <div style="font-size: 0.75rem; color: var(--green-text); font-weight: 700;">Type New Base Entry into System:</div>
-            <div class="refill-val" id="refillSystemBase">৳0.00</div>
-          </div>
-          <button class="mini-copy-btn" id="copyRefillBaseBtn">Copy Base</button>
-        </div>
-
-        <!-- REVENUE BREAKDOWN ROWS (EXCL VAT) -->
-        <div class="refill-row split-row" style="margin-top: 4px;">
-          <span>Sheba Comm. Excl. VAT (<span id="shebaCommPercentLabel">30%</span>):</span>
-          <span id="shebaCommAmount" style="font-weight: 800;">৳0.00</span>
-        </div>
-        <div class="refill-row split-row">
-          <span>Partner Take Excl. VAT (<span id="partnerPercentLabel">70%</span>):</span>
-          <span id="partnerShareAmount" style="font-weight: 800;">৳0.00</span>
-        </div>
-        <div class="refill-row" style="padding: 4px 6px;">
-          <span style="color: var(--text-muted); font-size: 0.8rem;">Net Base Evaluated (Excl. VAT):</span>
-          <span id="totalCostBase" style="font-weight: 700; font-size: 0.85rem;">৳0.00</span>
-        </div>
-
-        <!-- COPY ALL SUMMARY BUTTON -->
-        <button class="copy-summary-btn" id="copySummaryBtn">📋 Copy All Summary</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">Copied to clipboard!</div>
-
-  <script>
-    const refillTargetInput = document.getElementById('refillTarget');
-    const vatRateInput = document.getElementById('vatRate');
-    const refillExistingInput = document.getElementById('refillExisting');
-    const manualAddInput = document.getElementById('manualAddInput');
-
-    const shebaCommRateInput = document.getElementById('shebaCommRate');
-    const partnerShareRateInput = document.getElementById('partnerShareRate');
-
-    const manualExpressionEl = document.getElementById('manualExpression');
-    const manualSumResultEl = document.getElementById('manualSumResult');
-    const vatRateDisplayEl = document.getElementById('vatRateDisplay');
-
-    const refillCurrentBaseEl = document.getElementById('refillCurrentBase');
-    const refillAutoVatEl = document.getElementById('refillAutoVat');
-    const refillSystemBaseEl = document.getElementById('refillSystemBase');
-    const copyRefillBaseBtn = document.getElementById('copyRefillBaseBtn');
-    const copySummaryBtn = document.getElementById('copySummaryBtn');
-
-    const shebaCommPercentLabel = document.getElementById('shebaCommPercentLabel');
-    const partnerPercentLabel = document.getElementById('partnerPercentLabel');
-    const shebaCommAmountEl = document.getElementById('shebaCommAmount');
-    const partnerShareAmountEl = document.getElementById('partnerShareAmount');
-    const totalCostBaseEl = document.getElementById('totalCostBase');
-
-    const themeToggle = document.getElementById('themeToggle');
-    const toast = document.getElementById('toast');
-
-    let targetType = 'incl'; // 'incl' or 'excl'
-    let existingType = 'base';
-    let exactRefillBase = 0;
-    let summaryText = "";
-
-    const formatBDT = (val) => {
-      const isNeg = val < 0;
-      const absVal = Math.abs(val || 0);
-      const formatted = '৳' + absVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      return isNeg ? '-' + formatted : formatted;
-    };
-
-    function setTargetType(type) {
-      targetType = type;
-      document.getElementById('btnTargetExcl').classList.toggle('active', type === 'excl');
-      document.getElementById('btnTargetIncl').classList.toggle('active', type === 'incl');
-      calculate();
-    }
-
-    function setExistingType(type) {
-      existingType = type;
-      document.getElementById('btnExistingBase').classList.toggle('active', type === 'base');
-      document.getElementById('btnExistingIncl').classList.toggle('active', type === 'incl');
-      calculate();
-    }
-
-    function parseSumExpression(expr) {
-      if (!expr) return 0;
-
-      let sanitized = expr.trim();
-      
-      sanitized = sanitized.replace(/(\d+(?:\.\d+)?)\s*([\+\-])\s*(\d+(?:\.\d+)?)%/g, (match, base, op, pct) => {
-        return `${base} ${op} (${base} * (${pct} / 100))`;
-      });
-
-      sanitized = sanitized.replace(/(\d+(?:\.\d+)?)%/g, '($1 / 100)');
-      sanitized = sanitized.replace(/[^0-9\+\-\*\/\.\s\(\)]/g, '');
-      if (!sanitized.trim()) return 0;
-
-      try {
-        const result = new Function(`return (${sanitized})`)();
-        return isNaN(result) || !isFinite(result) ? 0 : result;
-      } catch (e) {
-        return 0;
-      }
-    }
-
-    shebaCommRateInput.addEventListener('input', () => {
-      const commVal = parseFloat(shebaCommRateInput.value) || 0;
-      partnerShareRateInput.value = Math.max(0, 100 - commVal).toFixed(1);
-      calculate();
-    });
-
-    partnerShareRateInput.addEventListener('input', () => {
-      const partnerVal = parseFloat(partnerShareRateInput.value) || 0;
-      shebaCommRateInput.value = Math.max(0, 100 - partnerVal).toFixed(1);
-      calculate();
-    });
-
-    function calculate() {
-      const customVatPercent = parseFloat(vatRateInput.value) || 0;
-      const vatRateDecimal = customVatPercent / 100;
-      vatRateDisplayEl.textContent = `${customVatPercent}%`;
-
-      const manualMathResult = parseSumExpression(manualAddInput.value);
-      manualExpressionEl.textContent = manualAddInput.value.trim() || '-';
-      manualSumResultEl.textContent = formatBDT(manualMathResult);
-
-      const targetInputValue = parseFloat(refillTargetInput.value) || 0;
-      const rawExistingSum = parseSumExpression(refillExistingInput.value);
-
-      let existingBase = rawExistingSum;
-      if (existingType === 'incl') {
-        existingBase = rawExistingSum - (rawExistingSum * vatRateDecimal);
-      }
-
-      refillCurrentBaseEl.textContent = formatBDT(existingBase);
-
-      let netBaseEvaluated = 0;
-      let totalVat = 0;
-      let grossBill = 0;
-
-      if (targetInputValue > 0) {
-        if (targetType === 'excl') {
-          // Input is Base Amount (Excl. VAT)
-          netBaseEvaluated = targetInputValue;
-          totalVat = netBaseEvaluated * vatRateDecimal; // e.g. 1000 * 4.3% = 43.00
-          grossBill = netBaseEvaluated + totalVat;     // 1043.00
-        } else {
-          // Direct percentage reduction logic (1000 - 43 = 957)
-          grossBill = targetInputValue;
-          totalVat = grossBill * vatRateDecimal;       // e.g. 1000 * 4.3% = 43.00
-          netBaseEvaluated = grossBill - totalVat;     // 1000 - 43 = 957.00
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAT Calculator Sheba.xyz</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --input-bg: #ffffff;
+            --btn-blue: #2563eb;
+            --btn-hover: #1d4ed8;
+            --btn-green: #10b981;
+            --btn-green-hover: #059669;
+            --btn-purple: #8b5cf6;
+            --btn-purple-hover: #7c3aed;
+            --btn-danger: #ef4444;
+            --btn-danger-hover: #dc2626;
+            --accent-box: #eff6ff;
+            --accent-border: #3b82f6;
         }
 
-        exactRefillBase = Math.max(0, netBaseEvaluated - existingBase);
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --btn-blue: #3b82f6;
+            --btn-hover: #2563eb;
+            --accent-box: #1e3a8a;
+            --accent-border: #60a5fa;
+        }
 
-        refillAutoVatEl.textContent = formatBDT(totalVat);
-        refillSystemBaseEl.textContent = formatBDT(exactRefillBase);
-      } else {
-        exactRefillBase = 0;
-        netBaseEvaluated = manualMathResult;
-        refillAutoVatEl.textContent = formatBDT(0);
-        refillSystemBaseEl.textContent = formatBDT(0);
-      }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
 
-      // Commission Split Calculations
-      const commPercent = parseFloat(shebaCommRateInput.value) || 0;
-      const partnerPercent = parseFloat(partnerShareRateInput.value) || 0;
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
 
-      shebaCommPercentLabel.textContent = `${commPercent}%`;
-      partnerPercentLabel.textContent = `${partnerPercent}%`;
+        .panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 980px;
+            padding: 24px;
+        }
 
-      const shebaCommissionBDT = netBaseEvaluated * (commPercent / 100);
-      const partnerTakeBDT = netBaseEvaluated * (partnerPercent / 100);
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+        }
 
-      shebaCommAmountEl.textContent = formatBDT(shebaCommissionBDT);
-      partnerShareAmountEl.textContent = formatBDT(partnerTakeBDT);
-      totalCostBaseEl.textContent = formatBDT(netBaseEvaluated);
+        .brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-      summaryText = `📊 SHEBA BILL SUMMARY\n` +
-        `--------------------------\n` +
-        `Target Gross Bill: ${formatBDT(grossBill)}\n` +
-        `Manual Calculation (${manualAddInput.value.trim() || '0'}): ${formatBDT(manualMathResult)}\n` +
-        `Net Base (Excl. VAT): ${formatBDT(netBaseEvaluated)}\n` +
-        `VAT (${customVatPercent}%): ${formatBDT(totalVat)}\n` +
-        `--------------------------\n` +
-        `Sheba Comm. (${commPercent}%): ${formatBDT(shebaCommissionBDT)}\n` +
-        `Partner Take (${partnerPercent}%): ${formatBDT(partnerTakeBDT)}\n` +
-        `--------------------------\n` +
-        `New System Entry Base: ${exactRefillBase.toFixed(2)}`;
+        .brand-title span {
+            color: var(--btn-blue);
+        }
+
+        .theme-btn {
+            background: var(--btn-blue);
+            border: none;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .theme-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .target-bar {
+            background: var(--accent-box);
+            border: 1px solid var(--accent-border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .target-bar label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .target-bar input {
+            width: 130px;
+            padding: 6px 10px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 6px;
+            font-weight: 700;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .table-headers {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 0.8fr 1.2fr 1.5fr 1.5fr 1fr 0.8fr;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 0 4px;
+        }
+
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 0.8fr 1.2fr 1.5fr 1.5fr 1fr 0.8fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        input.service-input {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        input[readonly] {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--text-muted);
+        }
+
+        .btn-update {
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-update:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn-add {
+            background-color: var(--btn-green);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .btn-add:hover {
+            background-color: var(--btn-green-hover);
+        }
+
+        .btn-remove {
+            background-color: var(--btn-danger);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .btn-remove:hover {
+            background-color: var(--btn-danger-hover);
+        }
+
+        .summary-box {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-color);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 420px;
+        }
+
+        .summary-row.total {
+            font-weight: 800;
+            font-size: 16px;
+            border-top: 1.5px solid var(--border-color);
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+
+        .summary-row.highlight {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .summary-row.needed {
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .summary-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Compact button styles */
+        .btn-sm {
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+
+        .btn-sm-purple {
+            background-color: var(--btn-purple);
+            color: white;
+        }
+
+        .btn-sm-purple:hover {
+            background-color: var(--btn-purple-hover);
+        }
+
+        .btn-sm-blue {
+            background-color: var(--btn-blue);
+            color: white;
+        }
+
+        .btn-sm-blue:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn-sm-green {
+            background-color: var(--btn-green);
+            color: white;
+        }
+
+        .btn-sm-green:hover {
+            background-color: var(--btn-green-hover);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+<div class="panel">
+    <div class="panel-header">
+        <h3 class="brand-title">VAT Calculator <span>Sheba.xyz</span></h3>
+        <button class="theme-btn" onclick="toggleTheme()">🌙 Toggle Dark Mode</button>
+    </div>
+
+    <!-- TARGET BILL & VAT CONTROLS -->
+    <div class="target-bar">
+        <div>
+            <label for="targetBill">Target Total Bill (BDT): </label>
+            <input type="number" id="targetBill" value="0" placeholder="0" oninput="calculate()">
+        </div>
+        <div>
+            <label for="vatRate">VAT Rate (%): </label>
+            <input type="number" id="vatRate" value="4.5" step="0.1" placeholder="0" style="width: 80px;" oninput="calculate()">
+        </div>
+    </div>
+
+    <!-- TABLE HEADERS -->
+    <div class="table-headers">
+        <span>Service Name</span>
+        <span>Unit Price</span>
+        <span>Units</span>
+        <span>Price</span>
+        <span>Service Discount</span>
+        <span>Total Price</span>
+        <span>Action</span>
+        <span>Remove</span>
+    </div>
+
+    <!-- DYNAMIC ITEMS LIST -->
+    <div id="itemsContainer" class="items-container"></div>
+
+    <button class="btn-add" onclick="addItem()">+ Add Item</button>
+
+    <!-- SUMMARY DISPLAY -->
+    <div class="summary-box">
+        <div class="summary-row">
+            <span>Base Subtotal (Excl. VAT):</span>
+            <span><span id="resBase">0.00</span> BDT</span>
+        </div>
+        <div class="summary-row">
+            <span>System VAT Amount:</span>
+            <span>+ <span id="resVat">0.00</span> BDT</span>
+        </div>
+        <div class="summary-row">
+            <span>Total Discounts:</span>
+            <span>- <span id="resDisc">0.00</span> BDT</span>
+        </div>
+        <div class="summary-row total">
+            <span>Current Calculated Bill:</span>
+            <span><span id="resFinal">0.00</span> BDT</span>
+        </div>
+        <div class="summary-row needed">
+            <span>Amount Needed to Add:</span>
+            <span><span id="resNeededAdd">0.00</span> BDT</span>
+        </div>
+        <div class="summary-row highlight">
+            <span>Deducted VAT Portion (Target):</span>
+            <span><span id="resVatDeducted">0.00</span> BDT</span>
+        </div>
+        
+        <!-- NEEDED UNIT PRICE WITH INLINE COPY BUTTON -->
+        <div class="summary-row highlight">
+            <span>Needed Unit Price (Last Item):</span>
+            <div class="summary-value">
+                <span><span id="recLastItemPrice">0.00</span> BDT</span>
+                <button class="btn-sm btn-sm-purple" onclick="copyNeededPrice()" title="Copy Needed Price">📋 Copy</button>
+            </div>
+        </div>
+
+        <!-- COMPACT BOTTOM COPY BUTTONS -->
+        <div class="btn-group">
+            <button class="btn-sm btn-sm-blue" onclick="copySummary()">📋 Copy Summary</button>
+            <button class="btn-sm btn-sm-green" onclick="copyAll()">📄 Copy All Data</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let itemCount = 0;
+
+    function addItem(name = "", unitPrice = 0, units = 1, disc = 0) {
+        itemCount++;
+        const container = document.getElementById('itemsContainer');
+
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.id = `itemRow_${itemCount}`;
+        row.innerHTML = `
+            <input type="text" class="service-input" value="${name || 'Item ' + itemCount + ' :'}" placeholder="Service Name">
+            <input type="number" class="uprice" value="${unitPrice}" placeholder="0" oninput="calculate()">
+            <input type="number" class="units" value="${units}" placeholder="0" oninput="calculate()">
+            <input type="text" class="price" value="0.00" placeholder="0" readonly>
+            <input type="number" class="disc" value="${disc}" placeholder="0" oninput="calculate()">
+            <input type="text" class="total" value="0.00" placeholder="0" readonly>
+            <button class="btn-update" onclick="calculate()">Update</button>
+            <button class="btn-remove" onclick="removeItem('${row.id}')">🗑️</button>
+        `;
+        container.appendChild(row);
+        calculate();
     }
 
-    [refillTargetInput, vatRateInput, refillExistingInput, manualAddInput].forEach(el => {
-      el.addEventListener('input', calculate);
-      el.addEventListener('change', calculate);
-    });
+    function removeItem(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+            calculate();
+        }
+    }
 
-    copyRefillBaseBtn.addEventListener('click', () => {
-      if (exactRefillBase <= 0) return;
-      navigator.clipboard.writeText(exactRefillBase.toFixed(2)).then(() => {
-        toast.textContent = `Copied System Entry: ৳${exactRefillBase.toFixed(2)}`;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-      });
-    });
+    function calculate() {
+        const targetBill = parseFloat(document.getElementById('targetBill').value) || 0;
+        const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
 
-    copySummaryBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(summaryText).then(() => {
-        toast.textContent = `Full Summary Copied!`;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-      });
-    });
+        const rows = document.querySelectorAll('#itemsContainer .table-row');
+        let grossBase = 0;
+        let totalDiscounts = 0;
 
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.body.getAttribute('data-theme') === 'dark';
-      if (isDark) {
-        document.body.removeAttribute('data-theme');
-        themeToggle.textContent = '🌙 Dark';
-      } else {
-        document.body.setAttribute('data-theme', 'dark');
-        themeToggle.textContent = '☀️ Light';
-      }
-    });
+        let lastRowPrice = 0;
+        let lastRowUnits = 1;
 
-    calculate();
-  </script>
+        rows.forEach((row, index) => {
+            const uPrice = parseFloat(row.querySelector('.uprice').value) || 0;
+            const units = parseFloat(row.querySelector('.units').value) || 0;
+            const disc = parseFloat(row.querySelector('.disc').value) || 0;
+
+            const p = uPrice * units;
+            const t = p - disc;
+
+            row.querySelector('.price').value = p.toFixed(2);
+            row.querySelector('.total').value = t.toFixed(2);
+
+            grossBase += p;
+            totalDiscounts += disc;
+
+            if (index === rows.length - 1) {
+                lastRowPrice = p;
+                lastRowUnits = units || 1;
+            }
+        });
+
+        const vatAmount = grossBase * (vatRate / 100);
+        const currentBill = grossBase + vatAmount - totalDiscounts;
+
+        // VAT Portion inside Target Total Bill
+        const vatFactor = 1 + (vatRate / 100);
+        const targetBase = (targetBill + totalDiscounts) / vatFactor;
+        const vatDeducted = targetBill - targetBase;
+
+        // Needed Amount to Add to hit Target Bill
+        const amountNeededToAdd = Math.max(0, targetBill - currentBill);
+
+        // Required Last Item Unit Price to auto-fill target
+        const otherItemsBase = grossBase - lastRowPrice;
+        const requiredLastItemBase = targetBase - otherItemsBase;
+        const neededLastItemUnitPrice = requiredLastItemBase / lastRowUnits;
+
+        document.getElementById('resBase').innerText = grossBase.toFixed(2);
+        document.getElementById('resVat').innerText = vatAmount.toFixed(2);
+        document.getElementById('resDisc').innerText = totalDiscounts.toFixed(2);
+        document.getElementById('resFinal').innerText = currentBill.toFixed(2);
+        document.getElementById('resNeededAdd').innerText = amountNeededToAdd.toFixed(2);
+        document.getElementById('resVatDeducted').innerText = Math.max(0, vatDeducted).toFixed(2);
+        document.getElementById('recLastItemPrice').innerText = Math.max(0, neededLastItemUnitPrice).toFixed(2);
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    function copyNeededPrice() {
+        const neededPrice = document.getElementById('recLastItemPrice').innerText;
+        navigator.clipboard.writeText(neededPrice).then(() => {
+            alert(`Needed Unit Price (${neededPrice} BDT) copied!`);
+        });
+    }
+
+    function copySummary() {
+        const summaryText = `Base Subtotal (Excl. VAT): ${document.getElementById('resBase').innerText} BDT\nSystem VAT Amount: + ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: - ${document.getElementById('resDisc').innerText} BDT\nCurrent Calculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed to Add: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT Portion (Target): ${document.getElementById('resVatDeducted').innerText} BDT\nNeeded Unit Price (Last Item): ${document.getElementById('recLastItemPrice').innerText} BDT`;
+
+        navigator.clipboard.writeText(summaryText).then(() => {
+            alert("Summary copied!");
+        });
+    }
+
+    function copyAll() {
+        const targetBill = document.getElementById('targetBill').value || 0;
+        const vatRate = document.getElementById('vatRate').value || 0;
+
+        let itemsText = "--- ITEMS ---\n";
+        const rows = document.querySelectorAll('#itemsContainer .table-row');
+        rows.forEach((row, idx) => {
+            const name = row.querySelector('.service-input').value;
+            const uprice = row.querySelector('.uprice').value;
+            const units = row.querySelector('.units').value;
+            const disc = row.querySelector('.disc').value;
+            const total = row.querySelector('.total').value;
+            itemsText += `${idx + 1}. ${name} | Unit Price: ${uprice} | Qty: ${units} | Disc: ${disc} | Total: ${total} BDT\n`;
+        });
+
+        const fullText = `=== VAT Calculator Sheba.xyz ===\nTarget Bill: ${targetBill} BDT | VAT Rate: ${vatRate}%\n\n${itemsText}\n--- SUMMARY ---\nBase Subtotal: ${document.getElementById('resBase').innerText} BDT\nSystem VAT: ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: ${document.getElementById('resDisc').innerText} BDT\nCalculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT: ${document.getElementById('resVatDeducted').innerText} BDT\nNeeded Unit Price: ${document.getElementById('recLastItemPrice').innerText} BDT`;
+
+        navigator.clipboard.writeText(fullText).then(() => {
+            alert("All calculator data copied!");
+        });
+    }
+
+    // Initialize with 2 default rows set to 0
+    window.onload = function() {
+        addItem("Item 1 :", 0, 1, 0);
+        addItem("Item 2 :", 0, 1, 0);
+    };
+</script>
 
 </body>
 </html>
