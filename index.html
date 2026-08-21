@@ -492,7 +492,7 @@
             </div>
             
             <div class="summary-row hero-price">
-                <span class="hero-price-label">Target Unit Rate</span>
+                <span class="hero-price-label">Update this amount to reach the correct bill</span>
                 <div class="summary-value">
                     <span class="hero-price-val"><span id="recLastItemPrice">0.00</span> BDT</span>
                     <button class="btn-hero-copy" onclick="copyNeededPrice()" title="Copy Target Rate">📋 Copy</button>
@@ -634,17 +634,13 @@
 
     function copyNeededPrice() {
         const neededPrice = document.getElementById('recLastItemPrice').innerText;
-        navigator.clipboard.writeText(neededPrice).then(() => {
-            alert(`Target Unit Rate (${neededPrice} BDT) copied!`);
-        });
+        navigator.clipboard.writeText(neededPrice);
     }
 
     function copySummary() {
-        const summaryText = `Base Subtotal (Excl. VAT): ${document.getElementById('resBase').innerText} BDT\nSystem VAT Amount: + ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: - ${document.getElementById('resDisc').innerText} BDT\nCurrent Calculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed to Add: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT Portion (Target): ${document.getElementById('resVatDeducted').innerText} BDT\nTarget Unit Rate: ${document.getElementById('recLastItemPrice').innerText} BDT\nSheba Commission (30%): ${document.getElementById('resShebaComm').innerText} BDT\nSP Commission (70%): ${document.getElementById('resSpComm').innerText} BDT`;
+        const summaryText = `Base Subtotal (Excl. VAT): ${document.getElementById('resBase').innerText} BDT\nSystem VAT Amount: + ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: - ${document.getElementById('resDisc').innerText} BDT\nCurrent Calculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed to Add: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT Portion (Target): ${document.getElementById('resVatDeducted').innerText} BDT\nUpdate this amount to reach the correct bill: ${document.getElementById('recLastItemPrice').innerText} BDT\nSheba Commission (30%): ${document.getElementById('resShebaComm').innerText} BDT\nSP Commission (70%): ${document.getElementById('resSpComm').innerText} BDT`;
 
-        navigator.clipboard.writeText(summaryText).then(() => {
-            alert("Summary copied!");
-        });
+        navigator.clipboard.writeText(summaryText);
     }
 
     function copyAll() {
@@ -663,11 +659,9 @@
             itemsText += `${idx + 1}. ${name} | Unit Price: ${uprice} | Qty: ${units} | Disc: ${disc} | Total: ${total} | Price + VAT: ${priceWithVat} BDT\n`;
         });
 
-        const fullText = `=== VAT Calculator Sheba.xyz ===\nTarget Bill: ${targetBill} BDT | VAT Rate: ${vatRate}%\n\n${itemsText}\n--- SUMMARY ---\nBase Subtotal: ${document.getElementById('resBase').innerText} BDT\nSystem VAT: ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: ${document.getElementById('resDisc').innerText} BDT\nCalculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT: ${document.getElementById('resVatDeducted').innerText} BDT\nTarget Unit Rate: ${document.getElementById('recLastItemPrice').innerText} BDT\nSheba Commission (30%): ${document.getElementById('resShebaComm').innerText} BDT\nSP Commission (70%): ${document.getElementById('resSpComm').innerText} BDT`;
+        const fullText = `=== VAT Calculator Sheba.xyz ===\nTarget Bill: ${targetBill} BDT | VAT Rate: ${vatRate}%\n\n${itemsText}\n--- SUMMARY ---\nBase Subtotal: ${document.getElementById('resBase').innerText} BDT\nSystem VAT: ${document.getElementById('resVat').innerText} BDT\nTotal Discounts: ${document.getElementById('resDisc').innerText} BDT\nCalculated Bill: ${document.getElementById('resFinal').innerText} BDT\nAmount Needed: ${document.getElementById('resNeededAdd').innerText} BDT\nDeducted VAT: ${document.getElementById('resVatDeducted').innerText} BDT\nUpdate this amount to reach the correct bill: ${document.getElementById('recLastItemPrice').innerText} BDT\nSheba Commission (30%): ${document.getElementById('resShebaComm').innerText} BDT\nSP Commission (70%): ${document.getElementById('resSpComm').innerText} BDT`;
 
-        navigator.clipboard.writeText(fullText).then(() => {
-            alert("All calculator data copied!");
-        });
+        navigator.clipboard.writeText(fullText);
     }
 
     window.onload = function() {
